@@ -398,6 +398,66 @@ function zca_get_practice_svg_icon($name = '') {
 function zca_legal_ensure_core_practice_areas() {
     $core_areas = array(
         array(
+            'title'   => 'Civil Cases & Property Litigation',
+            'slug'    => 'civil-cases',
+            'excerpt' => 'Representation in all types of civil litigation, title suits, partition, injunctions, and property disputes before all courts.',
+            'cat'     => 'litigation',
+        ),
+        array(
+            'title'   => 'Criminal Cases & Special Tribunal Defense',
+            'slug'    => 'criminal-cases',
+            'excerpt' => 'Defense in criminal cases at all stages — Magistrate Court, Sessions Tribunal, High Court Division, and ACC quashments.',
+            'cat'     => 'litigation',
+        ),
+        array(
+            'title'   => 'Writ Petitions & High Court Division',
+            'slug'    => 'writ-file',
+            'excerpt' => 'Filing Constitutional Writ Petitions (Mandamus, Certiorari, Habeas Corpus, Prohibition) for fundamental rights before High Court Division.',
+            'cat'     => 'litigation',
+        ),
+        array(
+            'title'   => 'Bail Matters (Anticipatory, Interim & Regular)',
+            'slug'    => 'bail',
+            'excerpt' => 'Urgent bail applications, anticipatory bail before High Court Division, interim bail, and surrender before Magistrate & Sessions courts.',
+            'cat'     => 'litigation',
+        ),
+        array(
+            'title'   => 'Cheque Dishonor & NI Act 138 Litigation',
+            'slug'    => 'cheque-matter',
+            'excerpt' => 'Legal assistance, statutory notice drafting, trial defense, and appeal in Section 138/140 Negotiable Instruments Act cheque dishonor cases.',
+            'cat'     => 'litigation',
+        ),
+        array(
+            'title'   => 'Company Registration & RJSC Approval',
+            'slug'    => 'company-registration',
+            'excerpt' => 'Company formation (Private Limited, OPC, Public), RJSC name clearance, Memorandum (MOA) & Articles (AOA) drafting, and foreign branch setup.',
+            'cat'     => 'corporate',
+        ),
+        array(
+            'title'   => 'Trademark & IP Rights Registration',
+            'slug'    => 'trademark-registration',
+            'excerpt' => 'Trademark search, filing, opposition, copyright, patent registration at DPFDT, and High Court IP infringement litigation.',
+            'cat'     => 'corporate',
+        ),
+        array(
+            'title'   => 'Share Transfer, Allotment & RJSC Form 117',
+            'slug'    => 'share-transfer',
+            'excerpt' => 'Executing Form 117 share transfers, fresh share allotment, shareholder agreements, capital increase, and Board resolution filings.',
+            'cat'     => 'corporate',
+        ),
+        array(
+            'title'   => 'Income Tax, VAT & Customs Law',
+            'slug'    => 'income-tax-vat-customs',
+            'excerpt' => 'Corporate tax planning, Income Tax Act 2023 assessment defense, VAT audit resolution, Customs Appellate Tribunal, and High Court tax references.',
+            'cat'     => 'tax',
+        ),
+        array(
+            'title'   => 'Family Law, Divorce, Dower & Custody',
+            'slug'    => 'family-matters',
+            'excerpt' => 'Family Court litigation — Dissolution of Marriage (Divorce), Dower (Mahr), Maintenance, Child Custody & Guardianship petitions.',
+            'cat'     => 'advisory',
+        ),
+        array(
             'title'   => 'Administrative & Constitutional Matters',
             'slug'    => 'administrative-constitutional-matters',
             'excerpt' => 'Constitutional litigation, writ petitions (Mandamus, Certiorari, Habeas Corpus) and judicial review before High Court Division.',

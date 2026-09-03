@@ -214,6 +214,76 @@ function zca_legal_execute_demo_import() {
     // 5. Import 24 Practice Areas with Dynamic Steps & Taxonomy Assignment
     $practice_items = array(
         array(
+            'title'    => 'Civil Cases & Property Litigation',
+            'category' => 'litigation',
+            'icon'     => 'fa-solid fa-landmark-flag',
+            'desc'     => 'Representation in all types of civil litigation, title suits, partition, injunctions, and property disputes before all courts.',
+            'badge'    => 'Litigation'
+        ),
+        array(
+            'title'    => 'Criminal Cases & Special Tribunal Defense',
+            'category' => 'litigation',
+            'icon'     => 'fa-solid fa-gavel',
+            'desc'     => 'Defense in criminal cases at all stages — Magistrate Court, Sessions Tribunal, High Court Division, and ACC quashments.',
+            'badge'    => 'Defense'
+        ),
+        array(
+            'title'    => 'Writ Petitions & High Court Division',
+            'category' => 'litigation',
+            'icon'     => 'fa-solid fa-file-contract',
+            'desc'     => 'Filing Constitutional Writ Petitions (Mandamus, Certiorari, Habeas Corpus, Prohibition) for fundamental rights before High Court Division.',
+            'badge'    => 'High Court'
+        ),
+        array(
+            'title'    => 'Bail Matters (Anticipatory, Interim & Regular)',
+            'category' => 'litigation',
+            'icon'     => 'fa-solid fa-key',
+            'desc'     => 'Urgent bail applications, anticipatory bail before High Court Division, interim bail, and surrender before Magistrate & Sessions courts.',
+            'badge'    => 'Urgent'
+        ),
+        array(
+            'title'    => 'Cheque Dishonor & NI Act 138 Litigation',
+            'category' => 'litigation',
+            'icon'     => 'fa-solid fa-money-check-dollar',
+            'desc'     => 'Legal assistance, statutory notice drafting, trial defense, and appeal in Section 138/140 Negotiable Instruments Act cheque dishonor cases.',
+            'badge'    => 'NI Act'
+        ),
+        array(
+            'title'    => 'Company Registration & RJSC Approval',
+            'category' => 'corporate',
+            'icon'     => 'fa-solid fa-building-user',
+            'desc'     => 'Company formation (Private Limited, OPC, Public), RJSC name clearance, Memorandum (MOA) & Articles (AOA) drafting, and foreign branch setup.',
+            'badge'    => 'RJSC'
+        ),
+        array(
+            'title'    => 'Trademark & IP Rights Registration',
+            'category' => 'corporate',
+            'icon'     => 'fa-solid fa-registered',
+            'desc'     => 'Trademark search, filing, opposition, copyright, patent registration at DPFDT, and High Court IP infringement litigation.',
+            'badge'    => 'IP Rights'
+        ),
+        array(
+            'title'    => 'Share Transfer, Allotment & RJSC Form 117',
+            'category' => 'corporate',
+            'icon'     => 'fa-solid fa-chart-pie',
+            'desc'     => 'Executing Form 117 share transfers, fresh share allotment, shareholder agreements, capital increase, and Board resolution filings.',
+            'badge'    => 'Corporate'
+        ),
+        array(
+            'title'    => 'Income Tax, VAT & Customs Law',
+            'category' => 'tax',
+            'icon'     => 'fa-solid fa-calculator',
+            'desc'     => 'Corporate tax planning, Income Tax Act 2023 assessment defense, VAT audit resolution, Customs Appellate Tribunal, and High Court tax references.',
+            'badge'    => 'Tax & VAT'
+        ),
+        array(
+            'title'    => 'Family Law, Divorce, Dower & Custody',
+            'category' => 'advisory',
+            'icon'     => 'fa-solid fa-people-roof',
+            'desc'     => 'Family Court litigation — Dissolution of Marriage (Divorce), Dower (Mahr), Maintenance, Child Custody & Guardianship petitions.',
+            'badge'    => 'Family'
+        ),
+        array(
             'title'    => 'Corporate & Company Law Advisory',
             'category' => 'corporate',
             'icon'     => 'fa-solid fa-city',

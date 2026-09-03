@@ -145,41 +145,51 @@ $chamber3_address = zca_get_option('chamber3_address', 'Room No. B 36, Parjoar C
         </div>
 
         <!-- Right: Direct Help Box -->
-        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-          <div class="sidebar-widget sidebar-widget-dark">
-            <h3 class="sidebar-widget-title" style="border-color: var(--color-gold);">
-              <i class="fa-solid fa-phone-volume" style="color: var(--color-gold);"></i> Direct Hotlines
-            </h3>
-            <p style="color: #cbd5e1; font-size: 0.85rem; margin-bottom: 1.25rem;">
-              For emergency stay orders, bails, or immediate legal notices:
+        <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+          <div class="contact-hotline-card">
+            <div class="contact-hotline-header">
+              <div class="contact-hotline-title">
+                <i class="fa-solid fa-phone-volume"></i> Direct Hotlines
+              </div>
+              <span class="contact-hotline-underline"></span>
+            </div>
+            <p class="contact-hotline-desc">
+              For emergency stay orders, bails, or immediate legal notice drafting:
             </p>
-            <div style="margin-bottom: 1rem;">
-              <strong style="color: #fff; font-size: 0.8rem; text-transform: uppercase;">Chamber Desk:</strong><br>
-              <a href="tel:<?php echo esc_attr(preg_replace('/[^0-9]/', '', $hotline)); ?>" style="color: var(--color-gold); font-size: 1.2rem; font-weight: bold;">
-                +88 <?php echo esc_html($hotline); ?>
+            
+            <div class="contact-hotline-item">
+              <span class="contact-hotline-label">Chamber Desk</span>
+              <a href="tel:<?php echo esc_attr(preg_replace('/[^0-9]/', '', $hotline)); ?>" class="contact-hotline-num chamber-num">
+                <i class="fa-solid fa-square-phone"></i> +88 <?php echo esc_html($hotline); ?>
               </a>
             </div>
-            <div style="margin-bottom: 1.5rem;">
-              <strong style="color: #fff; font-size: 0.8rem; text-transform: uppercase;">Direct WhatsApp:</strong><br>
-              <a href="https://wa.me/88<?php echo esc_attr(preg_replace('/[^0-9]/', '', $whatsapp)); ?>" target="_blank" style="color: #25D366; font-size: 1.1rem; font-weight: bold;">
-                +88 <?php echo esc_html($whatsapp); ?>
+
+            <div class="contact-hotline-item">
+              <span class="contact-hotline-label">Direct WhatsApp</span>
+              <a href="https://wa.me/88<?php echo esc_attr(preg_replace('/[^0-9]/', '', $whatsapp)); ?>" target="_blank" class="contact-hotline-num whatsapp-num">
+                <i class="fa-brands fa-whatsapp"></i> +88 <?php echo esc_html($whatsapp); ?>
               </a>
             </div>
-            <a href="https://wa.me/88<?php echo esc_attr(preg_replace('/[^0-9]/', '', $whatsapp)); ?>" target="_blank" class="btn btn-whatsapp" style="width: 100%;">
+
+            <a href="https://wa.me/88<?php echo esc_attr(preg_replace('/[^0-9]/', '', $whatsapp)); ?>" target="_blank" class="contact-whatsapp-btn">
               <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp Now
             </a>
           </div>
 
-          <div class="sidebar-widget">
-            <h3 class="sidebar-widget-title">Chamber Hours</h3>
-            <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0.5rem;">
-              <strong>Saturday – Thursday:</strong> 10:00 AM – 8:30 PM
-            </p>
-            <p style="font-size: 0.85rem; color: #475569; margin-bottom: 1rem;">
-              <strong>Friday:</strong> Prior Appointment Only
-            </p>
-            <button class="btn btn-sm btn-navy" style="width: 100%;" onclick="openModal('consultationModal')">
-              Schedule Appointment
+          <div class="contact-hours-card">
+            <h3 class="contact-hours-title">
+              <i class="fa-regular fa-clock"></i> Chamber Hours
+            </h3>
+            <div class="contact-hours-row">
+              <span>Saturday – Thursday:</span>
+              <strong>10:00 AM – 8:30 PM</strong>
+            </div>
+            <div class="contact-hours-row">
+              <span>Friday:</span>
+              <strong>Prior Appointment Only</strong>
+            </div>
+            <button class="btn btn-navy" style="width: 100%; margin-top: 1.25rem;" onclick="openModal('consultationModal')">
+              <i class="fa-regular fa-calendar-check"></i> Schedule Appointment
             </button>
           </div>
         </div>

@@ -55,41 +55,79 @@ $practice_terms = get_terms(array(
         </div>
 
         <!-- Desktop Category Filter Tabs (Dynamically Fetched from practice_category Taxonomy) -->
-        <div class="filter-tabs">
-          <button class="filter-tab-btn practice-filter-btn active" data-category="all">All Practice Sectors</button>
+        <?php
+        $selected_cat = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : 'all';
+        $page_base_url = get_permalink();
+        ?>
+        <div class="filter-tabs" id="practiceFilterTabs">
+          <a href="<?php echo esc_url($page_base_url); ?>" class="filter-tab-btn practice-filter-btn <?php echo ($selected_cat === 'all') ? 'active' : ''; ?>" data-category="all">
+            All Practice Sectors
+          </a>
           <?php if (!empty($practice_terms) && !is_wp_error($practice_terms)) : ?>
-            <?php foreach ($practice_terms as $term) : ?>
-              <button class="filter-tab-btn practice-filter-btn" data-category="<?php echo esc_attr($term->slug); ?>">
+            <?php foreach ($practice_terms as $term) : 
+              $cat_url = add_query_arg('category', $term->slug, $page_base_url);
+              $is_active = ($selected_cat === $term->slug);
+            ?>
+              <a href="<?php echo esc_url($cat_url); ?>" class="filter-tab-btn practice-filter-btn <?php echo $is_active ? 'active' : ''; ?>" data-category="<?php echo esc_attr($term->slug); ?>">
                 <?php echo esc_html($term->name); ?> (<?php echo intval($term->count); ?>)
-              </button>
+              </a>
             <?php endforeach; ?>
           <?php else: ?>
             <!-- Fallback Static Categories -->
-            <button class="filter-tab-btn practice-filter-btn" data-category="corporate">Corporate & Commercial</button>
-            <button class="filter-tab-btn practice-filter-btn" data-category="litigation">Litigation & Court Appeals</button>
-            <button class="filter-tab-btn practice-filter-btn" data-category="tax">Taxation & Finance</button>
-            <button class="filter-tab-btn practice-filter-btn" data-category="property">Real Estate & Property</button>
-            <button class="filter-tab-btn practice-filter-btn" data-category="advisory">Advisory & Compliance</button>
+            <?php
+            $default_p_cats = array(
+                'corporate'  => 'Corporate & Commercial',
+                'litigation' => 'Litigation & Court Appeals',
+                'tax'        => 'Taxation & Finance',
+                'property'   => 'Real Estate & Property',
+                'advisory'   => 'Advisory & Compliance'
+            );
+            foreach ($default_p_cats as $c_slug => $c_label) :
+              $cat_url = add_query_arg('category', $c_slug, $page_base_url);
+            ?>
+              <a href="<?php echo esc_url($cat_url); ?>" class="filter-tab-btn practice-filter-btn <?php echo ($selected_cat === $c_slug) ? 'active' : ''; ?>" data-category="<?php echo esc_attr($c_slug); ?>">
+                <?php echo esc_html($c_label); ?>
+              </a>
+            <?php endforeach; ?>
           <?php endif; ?>
         </div>
 
         <!-- Real-time Count Info -->
-        <div id="practiceCountInfo" class="search-results-info">Showing all practice areas</div>
-      </div>
-
-      <!-- Practice Image Cards Grid (Dynamic CPT Query with Pagination) -->
-      <div class="practice-image-grid" id="practiceGridContainer">
         <?php
-        $paged = (get_query_var('paged')) ? get_query_var('paged') : ((get_query_var('page')) ? get_query_var('page') : 1);
-        $p_query = new WP_Query(array(
+        $paged = (get_query_var('paged')) ? get_query_var('paged') : ((isset($_GET['paged'])) ? intval($_GET['paged']) : ((get_query_var('page')) ? get_query_var('page') : 1));
+        $p_query_args = array(
             'post_type'      => 'practice_area',
             'posts_per_page' => 12,
             'paged'          => $paged,
             'post_status'    => 'publish',
             'orderby'        => 'menu_order',
             'order'          => 'ASC'
-        ));
+        );
+        if ($selected_cat !== 'all') {
+            $p_query_args['tax_query'] = array(
+                array(
+                    'taxonomy' => 'practice_category',
+                    'field'    => 'slug',
+                    'terms'    => $selected_cat,
+                ),
+            );
+        }
+        $p_query = new WP_Query($p_query_args);
 
+        if ($selected_cat !== 'all') {
+            $term_obj = get_term_by('slug', $selected_cat, 'practice_category');
+            $term_name_display = $term_obj ? $term_obj->name : ucfirst($selected_cat);
+            $count_msg = sprintf('Showing %d practice area%s in "%s"', $p_query->found_posts, ($p_query->found_posts !== 1 ? 's' : ''), esc_html($term_name_display));
+        } else {
+            $count_msg = sprintf('Showing all %d practice areas', $p_query->found_posts);
+        }
+        ?>
+        <div id="practiceCountInfo" class="search-results-info"><?php echo esc_html($count_msg); ?></div>
+      </div>
+
+      <!-- Practice Image Cards Grid (Dynamic CPT Query with Pagination) -->
+      <div class="practice-image-grid" id="practiceGridContainer">
+        <?php
         if ($p_query->have_posts()) : while ($p_query->have_posts()) : $p_query->the_post();
             $icon = get_post_meta(get_the_ID(), '_zca_practice_icon', true);
             if (!$icon) $icon = 'fa-solid fa-scale-balanced';
@@ -141,25 +179,30 @@ $practice_terms = get_terms(array(
         <?php endwhile; wp_reset_postdata(); endif; ?>
 
         <!-- No Results Fallback Card -->
-        <div id="practiceNoResults" class="no-results-box">
+        <div id="practiceNoResults" class="no-results-box" style="<?php echo ($p_query->have_posts()) ? 'display: none;' : 'display: block;'; ?>">
           <i class="fa-solid fa-folder-open"></i>
           <h3 style="font-size: 1.25rem; color: #091528; margin-bottom: 0.5rem;">No Practice Areas Found</h3>
           <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.25rem;">
-            We couldn't find any legal practice areas matching your search criteria.
+            We couldn't find any legal practice areas matching your search criteria or selected category.
           </p>
-          <button class="btn btn-sm btn-primary" onclick="resetPracticeFilters()">
+          <a href="<?php echo esc_url($page_base_url); ?>" class="btn btn-sm btn-primary">
             <i class="fa-solid fa-rotate-left"></i> Reset Search & Filters
-          </button>
+          </a>
         </div>
 
       </div>
 
       <!-- Pagination Controls (12 Practice Areas Per Page) -->
       <?php if ($p_query->max_num_pages > 1) : ?>
-        <div class="pagination-wrapper">
+        <div class="pagination-wrapper" id="practicePaginationWrapper">
           <?php
+          $big = 999999999;
+          $paginate_base = str_replace($big, '%#%', esc_url(get_pagenum_link($big)));
+          if ($selected_cat !== 'all') {
+              $paginate_base = add_query_arg('category', $selected_cat, $paginate_base);
+          }
           echo paginate_links(array(
-              'base'      => str_replace(999999999, '%#%', esc_url(get_pagenum_link(999999999))),
+              'base'      => $paginate_base,
               'format'    => '?paged=%#%',
               'current'   => max(1, $paged),
               'total'     => $p_query->max_num_pages,
@@ -169,6 +212,8 @@ $practice_terms = get_terms(array(
           ));
           ?>
         </div>
+      <?php else: ?>
+        <div class="pagination-wrapper" id="practicePaginationWrapper" style="display: none;"></div>
       <?php endif; ?>
 
     </div>
@@ -200,23 +245,31 @@ $practice_terms = get_terms(array(
       <!-- Real Categories in Drawer -->
       <div class="offcanvas-section-title">Select Practice Category</div>
       <div class="offcanvas-category-list">
-        <div class="offcanvas-cat-item practice-offcanvas-cat active" data-category="all">
+        <a href="<?php echo esc_url($page_base_url); ?>" class="offcanvas-cat-item practice-offcanvas-cat <?php echo ($selected_cat === 'all') ? 'active' : ''; ?>" data-category="all">
           <span>All Practice Sectors</span>
-          <i class="fa-solid fa-check"></i>
-        </div>
+          <?php if ($selected_cat === 'all'): ?><i class="fa-solid fa-check"></i><?php endif; ?>
+        </a>
         <?php if (!empty($practice_terms) && !is_wp_error($practice_terms)) : ?>
-          <?php foreach ($practice_terms as $term) : ?>
-            <div class="offcanvas-cat-item practice-offcanvas-cat" data-category="<?php echo esc_attr($term->slug); ?>">
+          <?php foreach ($practice_terms as $term) : 
+            $cat_url = add_query_arg('category', $term->slug, $page_base_url);
+            $is_active = ($selected_cat === $term->slug);
+          ?>
+            <a href="<?php echo esc_url($cat_url); ?>" class="offcanvas-cat-item practice-offcanvas-cat <?php echo $is_active ? 'active' : ''; ?>" data-category="<?php echo esc_attr($term->slug); ?>">
               <span><?php echo esc_html($term->name); ?></span>
               <span style="font-size: 0.75rem; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px;"><?php echo intval($term->count); ?></span>
-            </div>
+              <?php if ($is_active): ?><i class="fa-solid fa-check"></i><?php endif; ?>
+            </a>
           <?php endforeach; ?>
         <?php else: ?>
-          <div class="offcanvas-cat-item practice-offcanvas-cat" data-category="corporate"><span>Corporate & Commercial</span></div>
-          <div class="offcanvas-cat-item practice-offcanvas-cat" data-category="litigation"><span>Litigation & Court Appeals</span></div>
-          <div class="offcanvas-cat-item practice-offcanvas-cat" data-category="tax"><span>Taxation & Finance</span></div>
-          <div class="offcanvas-cat-item practice-offcanvas-cat" data-category="property"><span>Real Estate & Property</span></div>
-          <div class="offcanvas-cat-item practice-offcanvas-cat" data-category="advisory"><span>Advisory & Compliance</span></div>
+          <?php foreach ($default_p_cats as $c_slug => $c_label) :
+            $cat_url = add_query_arg('category', $c_slug, $page_base_url);
+            $is_active = ($selected_cat === $c_slug);
+          ?>
+            <a href="<?php echo esc_url($cat_url); ?>" class="offcanvas-cat-item practice-offcanvas-cat <?php echo $is_active ? 'active' : ''; ?>" data-category="<?php echo esc_attr($c_slug); ?>">
+              <span><?php echo esc_html($c_label); ?></span>
+              <?php if ($is_active): ?><i class="fa-solid fa-check"></i><?php endif; ?>
+            </a>
+          <?php endforeach; ?>
         <?php endif; ?>
       </div>
     </div>

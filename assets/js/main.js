@@ -104,245 +104,387 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeFilterDrawer('blogFilterDrawer');
   });
 
-  // 6. Practice Areas: Instant Live Search & Dynamic Taxonomy Filter
-  const practiceSearchInput = document.getElementById('practiceSearchInput');
-  const practiceMobileSearch = document.getElementById('practiceMobileSearch');
-  const practiceSearchClear = document.getElementById('practiceSearchClear');
-  const practiceFilterBtns = document.querySelectorAll('.practice-filter-btn');
-  const practiceOffcanvasItems = document.querySelectorAll('.practice-offcanvas-cat');
-  const practiceCards = document.querySelectorAll('.practice-img-card, .practice-card');
-  const practiceNoResults = document.getElementById('practiceNoResults');
-  const practiceCountInfo = document.getElementById('practiceCountInfo');
-  const practiceTriggerBtn = document.getElementById('practiceFilterTriggerBtn');
+  // 6. Practice Areas: Server-Synced AJAX Category Filter, Pagination & Live Keyword Search
+  (function initPracticeFilter() {
+    const grid = document.getElementById('practiceGridContainer');
+    if (!grid) return;
 
-  let currentPracticeCategory = 'all';
-  let currentPracticeQuery = '';
+    const desktopTabs = document.getElementById('practiceFilterTabs');
+    const drawerList = document.querySelector('#practiceFilterDrawer .offcanvas-category-list');
+    const paginationWrapper = document.getElementById('practicePaginationWrapper');
+    const countInfo = document.getElementById('practiceCountInfo');
+    const searchInput = document.getElementById('practiceSearchInput');
+    const mobileSearch = document.getElementById('practiceMobileSearch');
+    const searchClear = document.getElementById('practiceSearchClear');
+    const triggerBtn = document.getElementById('practiceFilterTriggerBtn');
+    const noResults = document.getElementById('practiceNoResults');
 
-  function filterPracticeAreas() {
-    let visibleCount = 0;
-    const query = currentPracticeQuery.toLowerCase().trim();
+    let isFetching = false;
 
-    practiceCards.forEach(card => {
-      const rawCat = (card.getAttribute('data-category') || '').toLowerCase();
-      const cardCats = rawCat.split(' ');
-      const textContent = card.innerText.toLowerCase();
+    // Core AJAX Content Fetcher
+    async function fetchPracticeContent(url, pushState = true) {
+      if (isFetching) return;
+      isFetching = true;
 
-      const matchesCategory = (
-        currentPracticeCategory === 'all' || 
-        cardCats.includes(currentPracticeCategory.toLowerCase()) ||
-        rawCat === currentPracticeCategory.toLowerCase()
-      );
-      const matchesSearch = (!query || textContent.includes(query));
+      // Visual loading state
+      grid.style.opacity = '0.35';
+      grid.style.pointerEvents = 'none';
+      grid.style.transition = 'opacity 0.2s ease';
 
-      if (matchesCategory && matchesSearch) {
-        card.style.display = 'flex';
-        visibleCount++;
-      } else {
-        card.style.display = 'none';
+      try {
+        const response = await fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const html = await response.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+
+        // 1. Update Grid Content
+        const newGrid = doc.getElementById('practiceGridContainer');
+        if (newGrid) {
+          grid.innerHTML = newGrid.innerHTML;
+        }
+
+        // 2. Update Pagination Controls
+        const newPagination = doc.getElementById('practicePaginationWrapper');
+        if (newPagination && paginationWrapper) {
+          paginationWrapper.innerHTML = newPagination.innerHTML;
+          paginationWrapper.style.display = newPagination.style.display;
+        }
+
+        // 3. Update Result Count Text
+        const newCount = doc.getElementById('practiceCountInfo');
+        if (newCount && countInfo) {
+          countInfo.innerHTML = newCount.innerHTML;
+        }
+
+        // 4. Synchronize Desktop Filter Tabs
+        const newDesktopTabs = doc.getElementById('practiceFilterTabs');
+        if (newDesktopTabs && desktopTabs) {
+          desktopTabs.innerHTML = newDesktopTabs.innerHTML;
+        }
+
+        // 5. Synchronize Off-Canvas Drawer Category Items
+        const newDrawerList = doc.querySelector('#practiceFilterDrawer .offcanvas-category-list');
+        if (newDrawerList && drawerList) {
+          drawerList.innerHTML = newDrawerList.innerHTML;
+        }
+
+        // 6. Update Mobile Filter Trigger Button Badge
+        const parsedUrl = new URL(url, window.location.origin);
+        const catSlug = parsedUrl.searchParams.get('category') || 'all';
+        if (triggerBtn) {
+          const visibleCount = grid.querySelectorAll('.practice-img-card, .practice-card').length;
+          if (catSlug !== 'all') {
+            triggerBtn.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter (${catSlug.toUpperCase()}) • ${visibleCount}`;
+          } else {
+            triggerBtn.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter & Categories (${visibleCount})`;
+          }
+        }
+
+        // Reset search field
+        if (searchInput) searchInput.value = '';
+        if (mobileSearch) mobileSearch.value = '';
+        if (searchClear) searchClear.style.display = 'none';
+        if (noResults) noResults.style.display = 'none';
+
+        // 7. Update browser URL & state
+        if (pushState) {
+          window.history.pushState({ type: 'practice', url: url }, '', url);
+        }
+
+        // Smooth scroll back to top of practice section if user scrolled down
+        const section = grid.closest('section');
+        if (section) {
+          const targetY = section.getBoundingClientRect().top + window.pageYOffset - 100;
+          if (window.pageYOffset > targetY) {
+            window.scrollTo({ top: targetY, behavior: 'smooth' });
+          }
+        }
+      } catch (err) {
+        console.warn('Practice areas AJAX fetch failed, falling back to page reload:', err);
+        window.location.href = url;
+      } finally {
+        grid.style.opacity = '1';
+        grid.style.pointerEvents = 'auto';
+        isFetching = false;
+      }
+    }
+
+    // Intercept clicks on Desktop Category Tabs
+    desktopTabs?.addEventListener('click', (e) => {
+      const link = e.target.closest('.practice-filter-btn');
+      if (link && link.href) {
+        e.preventDefault();
+        fetchPracticeContent(link.href, true);
       }
     });
 
-    if (practiceNoResults) {
-      practiceNoResults.style.display = visibleCount === 0 ? 'block' : 'none';
-    }
-
-    if (practiceCountInfo) {
-      if (query || currentPracticeCategory !== 'all') {
-        practiceCountInfo.textContent = `Showing ${visibleCount} practice area${visibleCount !== 1 ? 's' : ''}`;
-      } else {
-        practiceCountInfo.textContent = `Showing all ${visibleCount} practice areas`;
+    // Intercept clicks on Mobile Drawer Category Links
+    drawerList?.addEventListener('click', (e) => {
+      const link = e.target.closest('.practice-offcanvas-cat');
+      if (link && link.href) {
+        e.preventDefault();
+        window.closeFilterDrawer('practiceFilterDrawer');
+        fetchPracticeContent(link.href, true);
       }
-    }
-
-    // Update Mobile Button Text
-    if (practiceTriggerBtn) {
-      if (currentPracticeCategory !== 'all') {
-        practiceTriggerBtn.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter (${currentPracticeCategory.toUpperCase()}) • ${visibleCount}`;
-      } else {
-        practiceTriggerBtn.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter & Categories (${visibleCount})`;
-      }
-    }
-  }
-
-  // Handle Practice Search Input (Desktop & Mobile)
-  function handlePracticeSearch(query) {
-    currentPracticeQuery = query;
-    if (practiceSearchInput && practiceSearchInput.value !== query) practiceSearchInput.value = query;
-    if (practiceMobileSearch && practiceMobileSearch.value !== query) practiceMobileSearch.value = query;
-    if (practiceSearchClear) {
-      practiceSearchClear.style.display = query ? 'block' : 'none';
-    }
-    filterPracticeAreas();
-  }
-
-  practiceSearchInput?.addEventListener('input', (e) => handlePracticeSearch(e.target.value));
-  practiceMobileSearch?.addEventListener('input', (e) => handlePracticeSearch(e.target.value));
-
-  practiceSearchClear?.addEventListener('click', () => {
-    handlePracticeSearch('');
-    practiceSearchInput?.focus();
-  });
-
-  // Desktop Practice Filter Buttons
-  practiceFilterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      practiceFilterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentPracticeCategory = btn.getAttribute('data-category') || 'all';
-
-      // Sync off-canvas items
-      practiceOffcanvasItems.forEach(item => {
-        item.classList.toggle('active', item.getAttribute('data-category') === currentPracticeCategory);
-      });
-
-      filterPracticeAreas();
     });
-  });
 
-  // Mobile Off-Canvas Practice Filter Items
-  practiceOffcanvasItems.forEach(item => {
-    item.addEventListener('click', () => {
-      practiceOffcanvasItems.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      currentPracticeCategory = item.getAttribute('data-category') || 'all';
+    // Intercept clicks on Pagination Links
+    paginationWrapper?.addEventListener('click', (e) => {
+      const link = e.target.closest('a.page-numbers');
+      if (link && link.href) {
+        e.preventDefault();
+        fetchPracticeContent(link.href, true);
+      }
+    });
 
-      // Sync desktop buttons
-      practiceFilterBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-category') === currentPracticeCategory);
-      });
-
-      filterPracticeAreas();
+    // Reset Filter Function
+    window.resetPracticeFilters = function() {
+      const allTab = desktopTabs?.querySelector('.practice-filter-btn[data-category="all"]');
+      const resetUrl = allTab ? allTab.href : window.location.pathname;
       window.closeFilterDrawer('practiceFilterDrawer');
-    });
-  });
+      fetchPracticeContent(resetUrl, true);
+    };
 
-  window.resetPracticeFilters = function() {
-    handlePracticeSearch('');
-    currentPracticeCategory = 'all';
-    practiceFilterBtns.forEach(b => b.classList.remove('active'));
-    document.querySelector('.practice-filter-btn[data-category="all"]')?.classList.add('active');
-    practiceOffcanvasItems.forEach(i => i.classList.remove('active'));
-    document.querySelector('.practice-offcanvas-cat[data-category="all"]')?.classList.add('active');
-    filterPracticeAreas();
-    window.closeFilterDrawer('practiceFilterDrawer');
-  };
+    // Instant In-Page Keyword Search
+    function filterLoadedPracticeCards(query) {
+      const q = (query || '').toLowerCase().trim();
+      const cards = grid.querySelectorAll('.practice-img-card, .practice-card');
+      let visible = 0;
 
-  // 7. Blog: Instant Live Search & Dynamic Taxonomy Filter
-  const blogSearchInput = document.getElementById('blogSearchInput');
-  const blogMobileSearch = document.getElementById('blogMobileSearch');
-  const blogSearchClear = document.getElementById('blogSearchClear');
-  const blogFilterBtns = document.querySelectorAll('.blog-filter-btn');
-  const blogOffcanvasItems = document.querySelectorAll('.blog-offcanvas-cat');
-  const blogCards = document.querySelectorAll('.blog-post-card, article.award-card');
-  const blogNoResults = document.getElementById('blogNoResults');
-  const blogCountInfo = document.getElementById('blogCountInfo');
-  const blogTriggerBtn = document.getElementById('blogFilterTriggerBtn');
-
-  let currentBlogCategory = 'all';
-  let currentBlogQuery = '';
-
-  function filterBlogPosts() {
-    let visibleCount = 0;
-    const query = currentBlogQuery.toLowerCase().trim();
-
-    blogCards.forEach(card => {
-      const rawCat = (card.getAttribute('data-category') || '').toLowerCase();
-      const cardCats = rawCat.split(' ');
-      const textContent = card.innerText.toLowerCase();
-
-      const matchesCategory = (
-        currentBlogCategory === 'all' || 
-        cardCats.includes(currentBlogCategory.toLowerCase()) ||
-        rawCat === currentBlogCategory.toLowerCase()
-      );
-      const matchesSearch = (!query || textContent.includes(query));
-
-      if (matchesCategory && matchesSearch) {
-        card.style.display = 'flex';
-        visibleCount++;
-      } else {
-        card.style.display = 'none';
-      }
-    });
-
-    if (blogNoResults) {
-      blogNoResults.style.display = visibleCount === 0 ? 'block' : 'none';
-    }
-
-    if (blogCountInfo) {
-      if (query || currentBlogCategory !== 'all') {
-        blogCountInfo.textContent = `Showing ${visibleCount} article${visibleCount !== 1 ? 's' : ''}`;
-      } else {
-        blogCountInfo.textContent = `Showing all ${visibleCount} articles`;
-      }
-    }
-
-    if (blogTriggerBtn) {
-      if (currentBlogCategory !== 'all') {
-        blogTriggerBtn.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter (${currentBlogCategory.toUpperCase()}) • ${visibleCount}`;
-      } else {
-        blogTriggerBtn.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter & Categories (${visibleCount})`;
-      }
-    }
-  }
-
-  function handleBlogSearch(query) {
-    currentBlogQuery = query;
-    if (blogSearchInput && blogSearchInput.value !== query) blogSearchInput.value = query;
-    if (blogMobileSearch && blogMobileSearch.value !== query) blogMobileSearch.value = query;
-    if (blogSearchClear) {
-      blogSearchClear.style.display = query ? 'block' : 'none';
-    }
-    filterBlogPosts();
-  }
-
-  blogSearchInput?.addEventListener('input', (e) => handleBlogSearch(e.target.value));
-  blogMobileSearch?.addEventListener('input', (e) => handleBlogSearch(e.target.value));
-
-  blogSearchClear?.addEventListener('click', () => {
-    handleBlogSearch('');
-    blogSearchInput?.focus();
-  });
-
-  blogFilterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      blogFilterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentBlogCategory = btn.getAttribute('data-category') || 'all';
-
-      blogOffcanvasItems.forEach(item => {
-        item.classList.toggle('active', item.getAttribute('data-category') === currentBlogCategory);
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        const matches = !q || text.includes(q);
+        card.style.display = matches ? 'flex' : 'none';
+        if (matches) visible++;
       });
 
-      filterBlogPosts();
+      if (noResults) {
+        noResults.style.display = visible === 0 ? 'block' : 'none';
+      }
+
+      if (countInfo) {
+        if (q) {
+          countInfo.textContent = `Found ${visible} matching practice area${visible !== 1 ? 's' : ''}`;
+        } else {
+          countInfo.textContent = `Showing all ${cards.length} practice areas`;
+        }
+      }
+    }
+
+    function handlePracticeSearch(query) {
+      if (searchInput && searchInput.value !== query) searchInput.value = query;
+      if (mobileSearch && mobileSearch.value !== query) mobileSearch.value = query;
+      if (searchClear) searchClear.style.display = query ? 'block' : 'none';
+      filterLoadedPracticeCards(query);
+    }
+
+    searchInput?.addEventListener('input', (e) => handlePracticeSearch(e.target.value));
+    mobileSearch?.addEventListener('input', (e) => handlePracticeSearch(e.target.value));
+    searchClear?.addEventListener('click', () => {
+      handlePracticeSearch('');
+      searchInput?.focus();
     });
-  });
 
-  blogOffcanvasItems.forEach(item => {
-    item.addEventListener('click', () => {
-      blogOffcanvasItems.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      currentBlogCategory = item.getAttribute('data-category') || 'all';
+    // Browser back/forward navigation support
+    window.addEventListener('popstate', () => {
+      if (document.getElementById('practiceGridContainer')) {
+        fetchPracticeContent(window.location.href, false);
+      }
+    });
+  })();
 
-      blogFilterBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-category') === currentBlogCategory);
-      });
+  // 7. Blog: Server-Synced AJAX Category Filter, Pagination & Live Keyword Search
+  (function initBlogFilter() {
+    const grid = document.getElementById('blogGridContainer');
+    if (!grid) return;
 
-      filterBlogPosts();
+    const desktopTabs = document.getElementById('blogFilterTabs');
+    const drawerList = document.querySelector('#blogFilterDrawer .offcanvas-category-list');
+    const paginationWrapper = document.getElementById('blogPaginationWrapper');
+    const countInfo = document.getElementById('blogCountInfo');
+    const searchInput = document.getElementById('blogSearchInput');
+    const mobileSearch = document.getElementById('blogMobileSearch');
+    const searchClear = document.getElementById('blogSearchClear');
+    const triggerBtn = document.getElementById('blogFilterTriggerBtn');
+    const noResults = document.getElementById('blogNoResults');
+
+    let isFetching = false;
+
+    // Core AJAX Content Fetcher
+    async function fetchBlogContent(url, pushState = true) {
+      if (isFetching) return;
+      isFetching = true;
+
+      // Visual loading state
+      grid.style.opacity = '0.35';
+      grid.style.pointerEvents = 'none';
+      grid.style.transition = 'opacity 0.2s ease';
+
+      try {
+        const response = await fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const html = await response.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+
+        // 1. Update Grid Content
+        const newGrid = doc.getElementById('blogGridContainer');
+        if (newGrid) {
+          grid.innerHTML = newGrid.innerHTML;
+        }
+
+        // 2. Update Pagination Controls
+        const newPagination = doc.getElementById('blogPaginationWrapper');
+        if (newPagination && paginationWrapper) {
+          paginationWrapper.innerHTML = newPagination.innerHTML;
+          paginationWrapper.style.display = newPagination.style.display;
+        }
+
+        // 3. Update Result Count Text
+        const newCount = doc.getElementById('blogCountInfo');
+        if (newCount && countInfo) {
+          countInfo.innerHTML = newCount.innerHTML;
+        }
+
+        // 4. Synchronize Desktop Filter Tabs
+        const newDesktopTabs = doc.getElementById('blogFilterTabs');
+        if (newDesktopTabs && desktopTabs) {
+          desktopTabs.innerHTML = newDesktopTabs.innerHTML;
+        }
+
+        // 5. Synchronize Off-Canvas Drawer Category Items
+        const newDrawerList = doc.querySelector('#blogFilterDrawer .offcanvas-category-list');
+        if (newDrawerList && drawerList) {
+          drawerList.innerHTML = newDrawerList.innerHTML;
+        }
+
+        // 6. Update Mobile Filter Trigger Button Badge
+        const parsedUrl = new URL(url, window.location.origin);
+        const catSlug = parsedUrl.searchParams.get('category') || 'all';
+        if (triggerBtn) {
+          const visibleCount = grid.querySelectorAll('.blog-post-card, article.award-card').length;
+          if (catSlug !== 'all') {
+            triggerBtn.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter (${catSlug.toUpperCase()}) • ${visibleCount}`;
+          } else {
+            triggerBtn.innerHTML = `<i class="fa-solid fa-sliders"></i> Filter & Categories (${visibleCount})`;
+          }
+        }
+
+        // Reset search field
+        if (searchInput) searchInput.value = '';
+        if (mobileSearch) mobileSearch.value = '';
+        if (searchClear) searchClear.style.display = 'none';
+        if (noResults) noResults.style.display = 'none';
+
+        // 7. Update browser URL & state
+        if (pushState) {
+          window.history.pushState({ type: 'blog', url: url }, '', url);
+        }
+
+        // Smooth scroll back to top of blog section if user scrolled down
+        const section = grid.closest('section');
+        if (section) {
+          const targetY = section.getBoundingClientRect().top + window.pageYOffset - 100;
+          if (window.pageYOffset > targetY) {
+            window.scrollTo({ top: targetY, behavior: 'smooth' });
+          }
+        }
+      } catch (err) {
+        console.warn('Blog AJAX fetch failed, falling back to page reload:', err);
+        window.location.href = url;
+      } finally {
+        grid.style.opacity = '1';
+        grid.style.pointerEvents = 'auto';
+        isFetching = false;
+      }
+    }
+
+    // Intercept clicks on Desktop Category Tabs
+    desktopTabs?.addEventListener('click', (e) => {
+      const link = e.target.closest('.blog-filter-btn');
+      if (link && link.href) {
+        e.preventDefault();
+        fetchBlogContent(link.href, true);
+      }
+    });
+
+    // Intercept clicks on Mobile Drawer Category Links
+    drawerList?.addEventListener('click', (e) => {
+      const link = e.target.closest('.blog-offcanvas-cat');
+      if (link && link.href) {
+        e.preventDefault();
+        window.closeFilterDrawer('blogFilterDrawer');
+        fetchBlogContent(link.href, true);
+      }
+    });
+
+    // Intercept clicks on Pagination Links
+    paginationWrapper?.addEventListener('click', (e) => {
+      const link = e.target.closest('a.page-numbers');
+      if (link && link.href) {
+        e.preventDefault();
+        fetchBlogContent(link.href, true);
+      }
+    });
+
+    // Reset Filter Function
+    window.resetBlogFilters = function() {
+      const allTab = desktopTabs?.querySelector('.blog-filter-btn[data-category="all"]');
+      const resetUrl = allTab ? allTab.href : window.location.pathname;
       window.closeFilterDrawer('blogFilterDrawer');
-    });
-  });
+      fetchBlogContent(resetUrl, true);
+    };
 
-  window.resetBlogFilters = function() {
-    handleBlogSearch('');
-    currentBlogCategory = 'all';
-    blogFilterBtns.forEach(b => b.classList.remove('active'));
-    document.querySelector('.blog-filter-btn[data-category="all"]')?.classList.add('active');
-    blogOffcanvasItems.forEach(i => i.classList.remove('active'));
-    document.querySelector('.blog-offcanvas-cat[data-category="all"]')?.classList.add('active');
-    filterBlogPosts();
-    window.closeFilterDrawer('blogFilterDrawer');
-  };
+    // Instant In-Page Keyword Search
+    function filterLoadedBlogCards(query) {
+      const q = (query || '').toLowerCase().trim();
+      const cards = grid.querySelectorAll('.blog-post-card, article.award-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        const matches = !q || text.includes(q);
+        card.style.display = matches ? 'flex' : 'none';
+        if (matches) visible++;
+      });
+
+      if (noResults) {
+        noResults.style.display = visible === 0 ? 'block' : 'none';
+      }
+
+      if (countInfo) {
+        if (q) {
+          countInfo.textContent = `Found ${visible} matching article${visible !== 1 ? 's' : ''}`;
+        } else {
+          countInfo.textContent = `Showing all ${cards.length} articles`;
+        }
+      }
+    }
+
+    function handleBlogSearch(query) {
+      if (blogSearchInput && blogSearchInput.value !== query) blogSearchInput.value = query;
+      if (blogMobileSearch && blogMobileSearch.value !== query) blogMobileSearch.value = query;
+      if (blogSearchClear) blogSearchClear.style.display = query ? 'block' : 'none';
+      filterLoadedBlogCards(query);
+    }
+
+    searchInput?.addEventListener('input', (e) => handleBlogSearch(e.target.value));
+    mobileSearch?.addEventListener('input', (e) => handleBlogSearch(e.target.value));
+    searchClear?.addEventListener('click', () => {
+      handleBlogSearch('');
+      searchInput?.focus();
+    });
+
+    // Browser back/forward navigation support
+    window.addEventListener('popstate', () => {
+      if (document.getElementById('blogGridContainer')) {
+        fetchBlogContent(window.location.href, false);
+      }
+    });
+  })();
 
   // 8. Gallery Filter & Lightbox
   const galleryFilterBtns = document.querySelectorAll('.gallery-filter-btn');

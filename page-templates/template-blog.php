@@ -54,43 +54,77 @@ $blog_categories = get_categories(array(
         </div>
 
         <!-- Desktop Category Filter Tabs (Dynamically Fetched from WordPress Database) -->
-        <div class="filter-tabs">
-          <button class="filter-tab-btn blog-filter-btn active" data-category="all">All Articles</button>
+        <?php
+        $selected_cat = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : 'all';
+        $page_base_url = get_permalink();
+        ?>
+        <div class="filter-tabs" id="blogFilterTabs">
+          <a href="<?php echo esc_url($page_base_url); ?>" class="filter-tab-btn blog-filter-btn <?php echo ($selected_cat === 'all') ? 'active' : ''; ?>" data-category="all">
+            All Articles
+          </a>
           <?php if (!empty($blog_categories) && !is_wp_error($blog_categories)) : ?>
             <?php foreach ($blog_categories as $cat) : 
               if ($cat->slug === 'uncategorized' && $cat->count == 0) continue;
+              $cat_url = add_query_arg('category', $cat->slug, $page_base_url);
+              $is_active = ($selected_cat === $cat->slug);
             ?>
-              <button class="filter-tab-btn blog-filter-btn" data-category="<?php echo esc_attr($cat->slug); ?>">
+              <a href="<?php echo esc_url($cat_url); ?>" class="filter-tab-btn blog-filter-btn <?php echo $is_active ? 'active' : ''; ?>" data-category="<?php echo esc_attr($cat->slug); ?>">
                 <?php echo esc_html($cat->name); ?> (<?php echo intval($cat->count); ?>)
-              </button>
+              </a>
             <?php endforeach; ?>
           <?php else: ?>
-            <button class="filter-tab-btn blog-filter-btn" data-category="startup">Startup & Corporate</button>
-            <button class="filter-tab-btn blog-filter-btn" data-category="trust">Trust & Estates</button>
-            <button class="filter-tab-btn blog-filter-btn" data-category="tech">Cyber & AI Law</button>
-            <button class="filter-tab-btn blog-filter-btn" data-category="labor">Labor & Employment</button>
-            <button class="filter-tab-btn blog-filter-btn" data-category="ip">Intellectual Property</button>
-            <button class="filter-tab-btn blog-filter-btn" data-category="litigation">Litigation & NI Act</button>
+            <?php
+            $default_blog_cats = array(
+                'startup'    => 'Startup & Corporate',
+                'trust'      => 'Trust & Estates',
+                'tech'       => 'Cyber & AI Law',
+                'labor'      => 'Labor & Employment',
+                'ip'         => 'Intellectual Property',
+                'litigation' => 'Litigation & NI Act'
+            );
+            foreach ($default_blog_cats as $c_slug => $c_label) :
+              $cat_url = add_query_arg('category', $c_slug, $page_base_url);
+            ?>
+              <a href="<?php echo esc_url($cat_url); ?>" class="filter-tab-btn blog-filter-btn <?php echo ($selected_cat === $c_slug) ? 'active' : ''; ?>" data-category="<?php echo esc_attr($c_slug); ?>">
+                <?php echo esc_html($c_label); ?>
+              </a>
+            <?php endforeach; ?>
           <?php endif; ?>
         </div>
 
         <!-- Real-time Count Info -->
-        <div id="blogCountInfo" class="search-results-info">Showing all articles</div>
-      </div>
-
-      <!-- Blog Grid Section (Dynamic WP Query with Pagination) -->
-      <div class="blog-grid-layout" id="blogGridContainer">
         <?php
-        $paged = (get_query_var('paged')) ? get_query_var('paged') : ((get_query_var('page')) ? get_query_var('page') : 1);
-        $blog_query = new WP_Query(array(
+        // Prepare query parameters
+        $paged = (get_query_var('paged')) ? get_query_var('paged') : ((isset($_GET['paged'])) ? intval($_GET['paged']) : ((get_query_var('page')) ? get_query_var('page') : 1));
+        $blog_query_args = array(
             'post_type'      => 'post',
             'posts_per_page' => 12,
             'paged'          => $paged,
             'post_status'    => 'publish',
             'orderby'        => 'date',
             'order'          => 'DESC'
-        ));
+        );
 
+        if ($selected_cat !== 'all') {
+            $blog_query_args['category_name'] = $selected_cat;
+        }
+
+        $blog_query = new WP_Query($blog_query_args);
+
+        if ($selected_cat !== 'all') {
+            $cat_obj = get_category_by_slug($selected_cat);
+            $cat_name_display = $cat_obj ? $cat_obj->name : ucfirst($selected_cat);
+            $count_msg = sprintf('Showing %d article%s in "%s"', $blog_query->found_posts, ($blog_query->found_posts !== 1 ? 's' : ''), esc_html($cat_name_display));
+        } else {
+            $count_msg = sprintf('Showing all %d articles', $blog_query->found_posts);
+        }
+        ?>
+        <div id="blogCountInfo" class="search-results-info"><?php echo esc_html($count_msg); ?></div>
+      </div>
+
+      <!-- Blog Grid Section (Dynamic WP Query with Pagination) -->
+      <div class="blog-grid-layout" id="blogGridContainer">
+        <?php
         if ($blog_query->have_posts()) : while ($blog_query->have_posts()) : $blog_query->the_post();
             $post_categories = get_the_category();
             $cat_slugs = array();
@@ -131,25 +165,30 @@ $blog_categories = get_categories(array(
         <?php endwhile; wp_reset_postdata(); endif; ?>
 
         <!-- No Results Fallback Card -->
-        <div id="blogNoResults" class="no-results-box">
+        <div id="blogNoResults" class="no-results-box" style="<?php echo ($blog_query->have_posts()) ? 'display: none;' : 'display: block;'; ?>">
           <i class="fa-solid fa-book-open"></i>
           <h3 style="font-size: 1.25rem; color: #091528; margin-bottom: 0.5rem;">No Articles Found</h3>
           <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.25rem;">
-            We couldn't find any legal blog articles matching your search query.
+            We couldn't find any legal blog articles matching your search query or selected category.
           </p>
-          <button class="btn btn-sm btn-primary" onclick="resetBlogFilters()">
+          <a href="<?php echo esc_url($page_base_url); ?>" class="btn btn-sm btn-primary">
             <i class="fa-solid fa-rotate-left"></i> Reset Search & Filters
-          </button>
+          </a>
         </div>
 
       </div>
 
       <!-- Pagination Controls (12 Articles Per Page) -->
       <?php if ($blog_query->max_num_pages > 1) : ?>
-        <div class="pagination-wrapper">
+        <div class="pagination-wrapper" id="blogPaginationWrapper">
           <?php
+          $big = 999999999;
+          $paginate_base = str_replace($big, '%#%', esc_url(get_pagenum_link($big)));
+          if ($selected_cat !== 'all') {
+              $paginate_base = add_query_arg('category', $selected_cat, $paginate_base);
+          }
           echo paginate_links(array(
-              'base'      => str_replace(999999999, '%#%', esc_url(get_pagenum_link(999999999))),
+              'base'      => $paginate_base,
               'format'    => '?paged=%#%',
               'current'   => max(1, $paged),
               'total'     => $blog_query->max_num_pages,
@@ -159,6 +198,8 @@ $blog_categories = get_categories(array(
           ));
           ?>
         </div>
+      <?php else: ?>
+        <div class="pagination-wrapper" id="blogPaginationWrapper" style="display: none;"></div>
       <?php endif; ?>
 
     </div>
@@ -190,26 +231,32 @@ $blog_categories = get_categories(array(
       <!-- Real Categories in Drawer -->
       <div class="offcanvas-section-title">Select Blog Category</div>
       <div class="offcanvas-category-list">
-        <div class="offcanvas-cat-item blog-offcanvas-cat active" data-category="all">
+        <a href="<?php echo esc_url($page_base_url); ?>" class="offcanvas-cat-item blog-offcanvas-cat <?php echo ($selected_cat === 'all') ? 'active' : ''; ?>" data-category="all">
           <span>All Articles</span>
-          <i class="fa-solid fa-check"></i>
-        </div>
+          <?php if ($selected_cat === 'all'): ?><i class="fa-solid fa-check"></i><?php endif; ?>
+        </a>
         <?php if (!empty($blog_categories) && !is_wp_error($blog_categories)) : ?>
           <?php foreach ($blog_categories as $cat) : 
             if ($cat->slug === 'uncategorized' && $cat->count == 0) continue;
+            $cat_url = add_query_arg('category', $cat->slug, $page_base_url);
+            $is_active = ($selected_cat === $cat->slug);
           ?>
-            <div class="offcanvas-cat-item blog-offcanvas-cat" data-category="<?php echo esc_attr($cat->slug); ?>">
+            <a href="<?php echo esc_url($cat_url); ?>" class="offcanvas-cat-item blog-offcanvas-cat <?php echo $is_active ? 'active' : ''; ?>" data-category="<?php echo esc_attr($cat->slug); ?>">
               <span><?php echo esc_html($cat->name); ?></span>
               <span style="font-size: 0.75rem; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px;"><?php echo intval($cat->count); ?></span>
-            </div>
+              <?php if ($is_active): ?><i class="fa-solid fa-check"></i><?php endif; ?>
+            </a>
           <?php endforeach; ?>
         <?php else: ?>
-          <div class="offcanvas-cat-item blog-offcanvas-cat" data-category="startup"><span>Startup & Corporate</span></div>
-          <div class="offcanvas-cat-item blog-offcanvas-cat" data-category="trust"><span>Trust & Estates</span></div>
-          <div class="offcanvas-cat-item blog-offcanvas-cat" data-category="tech"><span>Cyber & AI Law</span></div>
-          <div class="offcanvas-cat-item blog-offcanvas-cat" data-category="labor"><span>Labor & Employment</span></div>
-          <div class="offcanvas-cat-item blog-offcanvas-cat" data-category="ip"><span>Intellectual Property</span></div>
-          <div class="offcanvas-cat-item blog-offcanvas-cat" data-category="litigation"><span>Litigation & NI Act</span></div>
+          <?php foreach ($default_blog_cats as $c_slug => $c_label) :
+            $cat_url = add_query_arg('category', $c_slug, $page_base_url);
+            $is_active = ($selected_cat === $c_slug);
+          ?>
+            <a href="<?php echo esc_url($cat_url); ?>" class="offcanvas-cat-item blog-offcanvas-cat <?php echo $is_active ? 'active' : ''; ?>" data-category="<?php echo esc_attr($c_slug); ?>">
+              <span><?php echo esc_html($c_label); ?></span>
+              <?php if ($is_active): ?><i class="fa-solid fa-check"></i><?php endif; ?>
+            </a>
+          <?php endforeach; ?>
         <?php endif; ?>
       </div>
     </div>

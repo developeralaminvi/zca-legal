@@ -24,7 +24,7 @@ get_header();
     <div class="container">
       
       <!-- Filter Tabs -->
-      <div class="filter-tabs" style="margin-bottom: 2.5rem;">
+      <div class="filter-tabs gallery-filter-tabs" style="margin-bottom: 2.5rem;">
         <button class="filter-tab-btn gallery-filter-btn active" data-filter="all">All Photos</button>
         <button class="filter-tab-btn gallery-filter-btn" data-filter="awards">Awards & Honors</button>
         <button class="filter-tab-btn gallery-filter-btn" data-filter="chamber">Chamber & Client Meetings</button>

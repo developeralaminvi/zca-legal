@@ -381,4 +381,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const msg = encodeURIComponent(customText || "Hello ZCA Legal, I would like to inquire about legal consultation and retainer services.");
     window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
   };
+
+  // 10. Copy Post Link Handler
+  window.copyPostLink = function(button, url) {
+    const targetUrl = url || window.location.href;
+    const origHtml = button.innerHTML;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(targetUrl).then(() => {
+        showCopySuccess(button, origHtml);
+      }).catch(() => {
+        fallbackCopy(targetUrl, button, origHtml);
+      });
+    } else {
+      fallbackCopy(targetUrl, button, origHtml);
+    }
+  };
+
+  function fallbackCopy(text, button, origHtml) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showCopySuccess(button, origHtml);
+    } catch (err) {
+      console.error('Copy link failed', err);
+    }
+    document.body.removeChild(textArea);
+  }
+
+  function showCopySuccess(button, origHtml) {
+    button.classList.add('copied');
+    button.innerHTML = '<i class="fa-solid fa-check"></i> <span class="copy-text">Copied!</span>';
+    setTimeout(() => {
+      button.classList.remove('copied');
+      button.innerHTML = origHtml;
+    }, 2500);
+  }
 });

@@ -363,7 +363,7 @@ $hero_img = zca_get_option('hero_image', get_template_directory_uri() . '/assets
             With chambers strategically located at <strong>Mirpur DOHS, Supreme Court Bar Association, and Dhaka Judge Court</strong>, our team provides responsive representation in corporate governance, commercial disputes, and constitutional writ litigation.
           </p>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="about-feature-grid" style="margin-bottom: 1.5rem;">
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px;">
               <strong style="color: #091528; display: block; margin-bottom: 4px;">Advocacy & Strategy</strong>
               <span style="font-size: 0.8rem; color: #64748b;">Supreme Court writ, bail, injunctions, and appellate litigation.</span>

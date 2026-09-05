@@ -79,7 +79,7 @@ $blog_categories = get_categories(array(
       </div>
 
       <!-- Blog Grid Section (Dynamic WP Query with Pagination) -->
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;" id="blogGridContainer">
+      <div class="blog-grid-layout" id="blogGridContainer">
         <?php
         $paged = (get_query_var('paged')) ? get_query_var('paged') : ((get_query_var('page')) ? get_query_var('page') : 1);
         $blog_query = new WP_Query(array(

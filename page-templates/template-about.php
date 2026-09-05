@@ -41,7 +41,7 @@ get_header();
             We are deeply committed to providing comprehensive legal services, maintaining continuous communication with our clients, and delivering excellence in every aspect of our work. Our focus on quality service and constant improvement has earned us the lasting trust and confidence of those we serve.
           </p>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="about-feature-grid">
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px;">
               <strong style="color: #091528; display: block; margin-bottom: 4px;"><i class="fa-solid fa-award" style="color: #c59b4e;"></i> Commitment & Integrity</strong>
               <span style="font-size: 0.8rem; color: #64748b;">Continuous client communication and unyielding adherence to professional legal ethics.</span>
@@ -248,7 +248,7 @@ get_header();
       </div>
 
       <!-- 3 Chamber Cards -->
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;">
+      <div class="about-chambers-grid">
         <!-- Corporate Chamber -->
         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-xs); transition: all 0.3s ease;">
           <div style="color: var(--color-gold); font-size: 1.6rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-building-columns"></i></div>
@@ -287,7 +287,7 @@ get_header();
       </div>
 
       <!-- Phone, Email & Website Communication Hub -->
-      <div style="background: linear-gradient(135deg, #091528 0%, #152744 100%); border: 1px solid rgba(197, 155, 78, 0.4); border-radius: 14px; padding: 2.25rem 2rem; color: #ffffff; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; text-align: center; box-shadow: var(--shadow-md);">
+      <div class="about-comm-hub">
         <!-- Phone Column -->
         <div>
           <i class="fa-solid fa-phone" style="color: #c59b4e; font-size: 1.6rem; margin-bottom: 0.6rem; display: block;"></i>

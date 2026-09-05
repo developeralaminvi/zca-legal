@@ -96,7 +96,7 @@ $chamber3_address = zca_get_option('chamber3_address', 'Room No. B 36, Parjoar C
       </div>
 
       <!-- Contact Form & Info Grid -->
-      <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 3rem; align-items: start;">
+      <div class="contact-main-grid">
         
         <!-- Left: AJAX Contact Form -->
         <div class="single-content-box">

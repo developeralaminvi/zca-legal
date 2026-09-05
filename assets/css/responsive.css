@@ -276,13 +276,61 @@
     font-size: 0.75rem !important;
   }
 
-  /* Mobile Off-Canvas Filter Toggle */
-  .filter-tabs {
+  /* Mobile Off-Canvas Filter Toggle for directories */
+  .filter-search-container .filter-tabs {
     display: none !important;
+  }
+
+  /* Gallery Tabs remain visible as wrapped pill buttons */
+  .gallery-filter-tabs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-bottom: 1.75rem !important;
+  }
+
+  .gallery-filter-tabs .filter-tab-btn {
+    padding: 6px 14px !important;
+    font-size: 0.8rem !important;
   }
 
   .mobile-filter-bar {
     display: block;
+  }
+
+  /* Contact Page Grid Collapse on Tablet/Mobile */
+  .contact-main-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  /* Blog Grid: 2 Columns on Tablet */
+  .blog-grid-layout {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem !important;
+  }
+
+  /* Practice Wings Diagram on Tablet */
+  .wings-diagram-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.25rem !important;
+  }
+
+  .wings-hub-card {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* About Page Chamber & Communication Grids */
+  .about-chambers-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.25rem !important;
+  }
+
+  .about-comm-hub {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    padding: 1.75rem 1.25rem !important;
   }
 
   .single-page-layout {
@@ -438,6 +486,152 @@
   div[style*="grid-template-columns: repeat(3, 1fr)"] {
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
+  }
+
+  /* Contact Page Mobile Layout */
+  .contact-main-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .contact-hotline-card {
+    padding: 1.5rem 1.15rem !important;
+    border-radius: 16px !important;
+  }
+
+  .contact-hotline-title {
+    font-size: 1.15rem !important;
+  }
+
+  .contact-hotline-desc {
+    margin-bottom: 1.15rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .contact-hotline-item {
+    padding: 0.75rem 0.9rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .contact-hotline-num {
+    font-size: clamp(0.95rem, 4.5vw, 1.25rem) !important;
+    word-break: break-word !important;
+  }
+
+  .contact-whatsapp-btn {
+    padding: 11px 16px !important;
+    font-size: 0.8rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .contact-hours-card {
+    padding: 1.25rem 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  /* Chamber Card Buttons Stacking on Mobile */
+  .chamber-actions {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .chamber-actions .btn {
+    width: 100% !important;
+  }
+
+  /* Practice Wings Diagram on Mobile */
+  .wings-diagram-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .wings-hub-card {
+    grid-column: 1 / -1 !important;
+    margin: 0.5rem 0 !important;
+  }
+
+  .wings-hub-circle {
+    width: 115px !important;
+    height: 115px !important;
+  }
+
+  .wings-hub-circle span:first-child {
+    font-size: 1.05rem !important;
+  }
+
+  .wings-hub-circle span:last-child {
+    font-size: 1.25rem !important;
+  }
+
+  /* Blog & About Grids on Mobile */
+  .blog-grid-layout,
+  .about-feature-grid,
+  .about-chambers-grid,
+  .about-comm-hub {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .about-comm-hub {
+    padding: 1.5rem 1rem !important;
+  }
+
+  /* Single Blog Post Social Share & Author Bio on Mobile */
+  .single-post-title {
+    font-size: 1.45rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .post-share-section {
+    padding: 1.25rem 1rem !important;
+    margin-top: 2rem !important;
+  }
+
+  .post-share-title {
+    font-size: 0.95rem !important;
+  }
+
+  .post-share-buttons {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .share-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.5rem 0.4rem !important;
+    font-size: 0.74rem !important;
+  }
+
+  .single-author-bio {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+    padding-top: 1.5rem !important;
+    margin-top: 2rem !important;
+  }
+
+  .single-author-avatar {
+    margin: 0 auto !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Extra Small Mobile Phones (max-width: 380px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 380px) {
+  .post-share-buttons {
+    grid-template-columns: 1fr !important;
+  }
+
+  .contact-hotline-num {
+    font-size: 0.9rem !important;
+  }
+
+  .hero-cta-group .btn {
+    font-size: 0.72rem !important;
+    padding: 0.5rem 0.35rem !important;
   }
 }
 

@@ -31,7 +31,7 @@ while (have_posts()) : the_post();
   <section class="section section-dark" style="padding: 3.5rem 0 3rem; border-bottom: 2px solid var(--color-gold);">
     <div class="container">
       <span class="section-subtitle"><?php echo esc_html($cat_name); ?></span>
-      <h1 style="color: #fff; margin-bottom: 0.75rem; font-size: 2.25rem;"><?php the_title(); ?></h1>
+      <h1 class="single-post-title"><?php the_title(); ?></h1>
       <div style="display: flex; gap: 1.5rem; color: #94a3b8; font-size: 0.85rem; flex-wrap: wrap;">
         <span><i class="fa-regular fa-calendar"></i> <?php echo get_the_date(); ?></span>
         <span><i class="fa-regular fa-user"></i> By Advocate Md. Zahid Chowdhury</span>
@@ -72,10 +72,51 @@ while (have_posts()) : the_post();
               <?php the_content(); ?>
             </div>
 
+            <!-- Social Share Bar -->
+            <?php
+            $post_share_url   = urlencode(get_permalink());
+            $post_share_title = urlencode(get_the_title());
+            ?>
+            <div class="post-share-section">
+              <div class="post-share-header">
+                <div class="post-share-title">
+                  <i class="fa-solid fa-share-nodes"></i>
+                  <span>Share This Legal Insight</span>
+                </div>
+                <span class="post-share-subtitle">Distribute practical legal intelligence with your network</span>
+              </div>
+              <div class="post-share-buttons">
+                <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo $post_share_url; ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-facebook" title="Share on Facebook">
+                  <i class="fa-brands fa-facebook-f"></i>
+                  <span>Facebook</span>
+                </a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?php echo $post_share_url; ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-linkedin" title="Share on LinkedIn">
+                  <i class="fa-brands fa-linkedin-in"></i>
+                  <span>LinkedIn</span>
+                </a>
+                <a href="https://twitter.com/intent/tweet?url=<?php echo $post_share_url; ?>&text=<?php echo $post_share_title; ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-twitter" title="Share on X (Twitter)">
+                  <i class="fa-brands fa-x-twitter"></i>
+                  <span>X (Twitter)</span>
+                </a>
+                <a href="https://api.whatsapp.com/send?text=<?php echo $post_share_title; ?>%20<?php echo $post_share_url; ?>" target="_blank" rel="noopener noreferrer" class="share-btn share-whatsapp" title="Share on WhatsApp">
+                  <i class="fa-brands fa-whatsapp"></i>
+                  <span>WhatsApp</span>
+                </a>
+                <a href="mailto:?subject=<?php echo $post_share_title; ?>&body=<?php echo $post_share_url; ?>" class="share-btn share-email" title="Share via Email">
+                  <i class="fa-regular fa-envelope"></i>
+                  <span>Email</span>
+                </a>
+                <button type="button" class="share-btn share-copy" onclick="copyPostLink(this, '<?php the_permalink(); ?>')" title="Copy Link to Clipboard">
+                  <i class="fa-regular fa-copy"></i>
+                  <span class="copy-text">Copy Link</span>
+                </button>
+              </div>
+            </div>
+
             <!-- Author Bio Box -->
-            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--color-border); display: flex; gap: 1.25rem; align-items: center;">
-              <img src="<?php echo get_template_directory_uri(); ?>/assets/images/WhatsApp Image 2026-08-22 at 13.51.52.jpeg" alt="Adv. Zahid Chowdhury" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid var(--color-gold);">
-              <div>
+            <div class="single-author-bio">
+              <img src="<?php echo get_template_directory_uri(); ?>/assets/images/WhatsApp Image 2026-08-22 at 13.51.52.jpeg" alt="Adv. Zahid Chowdhury" class="single-author-avatar">
+              <div class="single-author-info">
                 <strong style="color: #091528; font-size: 1.05rem; display: block;">Advocate Md. Zahid Chowdhury</strong>
                 <span style="font-size: 0.8rem; color: #c59b4e; font-weight: 600;">Head of Chamber | Advocate, Supreme Court of Bangladesh</span>
                 <p style="font-size: 0.825rem; color: #64748b; margin-top: 4px; line-height: 1.5;">

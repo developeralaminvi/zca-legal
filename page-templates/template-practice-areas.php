@@ -10,7 +10,7 @@ get_header();
 // Fetch Dynamic Taxonomy Terms for Practice Categories from Database
 $practice_terms = get_terms(array(
     'taxonomy'   => 'practice_category',
-    'hide_empty' => false,
+    'hide_empty' => true,
     'orderby'    => 'name',
     'order'      => 'ASC'
 ));
@@ -65,6 +65,7 @@ $practice_terms = get_terms(array(
           </a>
           <?php if (!empty($practice_terms) && !is_wp_error($practice_terms)) : ?>
             <?php foreach ($practice_terms as $term) : 
+              if ($term->count <= 0) continue;
               $cat_url = add_query_arg('category', $term->slug, $page_base_url);
               $is_active = ($selected_cat === $term->slug);
             ?>
@@ -251,6 +252,7 @@ $practice_terms = get_terms(array(
         </a>
         <?php if (!empty($practice_terms) && !is_wp_error($practice_terms)) : ?>
           <?php foreach ($practice_terms as $term) : 
+            if ($term->count <= 0) continue;
             $cat_url = add_query_arg('category', $term->slug, $page_base_url);
             $is_active = ($selected_cat === $term->slug);
           ?>

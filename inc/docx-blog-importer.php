@@ -211,5 +211,15 @@ function zca_legal_import_all_docx_blogs($force = false) {
 
     wp_defer_term_counting(false);
     wp_defer_comment_counting(false);
+
+    // Recalculate all category terms so database term counts are immediately accurate
+    $all_cat_terms = get_terms(array(
+        'taxonomy'   => 'category',
+        'hide_empty' => false,
+        'fields'     => 'ids',
+    ));
+    if (!empty($all_cat_terms) && !is_wp_error($all_cat_terms)) {
+        wp_update_term_count_now($all_cat_terms, 'category');
+    }
 }
 // Note: Auto-run on 'init' removed as requested by user. Blog import only runs via Demo Importer.

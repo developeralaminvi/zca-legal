@@ -7,9 +7,9 @@
 
 get_header();
 
-// Fetch Dynamic WordPress Categories from Posts > Categories
+// Fetch Dynamic WordPress Categories with published posts
 $blog_categories = get_categories(array(
-    'hide_empty' => false,
+    'hide_empty' => true,
     'orderby'    => 'name',
     'order'      => 'ASC'
 ));
@@ -56,6 +56,11 @@ $blog_categories = get_categories(array(
         <!-- Desktop Category Filter Tabs (Dynamically Fetched from WordPress Database) -->
         <?php
         $selected_cat = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : 'all';
+        if ($selected_cat === 'startup') {
+            $selected_cat = 'corporate';
+        } elseif ($selected_cat === 'trust') {
+            $selected_cat = 'family';
+        }
         $page_base_url = get_permalink();
         ?>
         <div class="filter-tabs" id="blogFilterTabs">
@@ -64,7 +69,7 @@ $blog_categories = get_categories(array(
           </a>
           <?php if (!empty($blog_categories) && !is_wp_error($blog_categories)) : ?>
             <?php foreach ($blog_categories as $cat) : 
-              if ($cat->slug === 'uncategorized' && $cat->count == 0) continue;
+              if ($cat->count <= 0) continue;
               $cat_url = add_query_arg('category', $cat->slug, $page_base_url);
               $is_active = ($selected_cat === $cat->slug);
             ?>
@@ -75,12 +80,15 @@ $blog_categories = get_categories(array(
           <?php else: ?>
             <?php
             $default_blog_cats = array(
-                'startup'    => 'Startup & Corporate',
-                'trust'      => 'Trust & Estates',
+                'corporate'  => 'Startup & Corporate Law',
+                'tax'        => 'Taxation, VAT & Customs',
+                'property'   => 'Real Estate & Property',
+                'litigation' => 'Litigation & NI Act',
+                'ip'         => 'Intellectual Property',
                 'tech'       => 'Cyber & AI Law',
                 'labor'      => 'Labor & Employment',
-                'ip'         => 'Intellectual Property',
-                'litigation' => 'Litigation & NI Act'
+                'family'     => 'Family & Civil Rights',
+                'banking'    => 'Banking & Financial Recoveries'
             );
             foreach ($default_blog_cats as $c_slug => $c_label) :
               $cat_url = add_query_arg('category', $c_slug, $page_base_url);
@@ -237,7 +245,7 @@ $blog_categories = get_categories(array(
         </a>
         <?php if (!empty($blog_categories) && !is_wp_error($blog_categories)) : ?>
           <?php foreach ($blog_categories as $cat) : 
-            if ($cat->slug === 'uncategorized' && $cat->count == 0) continue;
+            if ($cat->count <= 0) continue;
             $cat_url = add_query_arg('category', $cat->slug, $page_base_url);
             $is_active = ($selected_cat === $cat->slug);
           ?>
@@ -248,7 +256,19 @@ $blog_categories = get_categories(array(
             </a>
           <?php endforeach; ?>
         <?php else: ?>
-          <?php foreach ($default_blog_cats as $c_slug => $c_label) :
+          <?php
+          $default_blog_cats = array(
+              'corporate'  => 'Startup & Corporate Law',
+              'tax'        => 'Taxation, VAT & Customs',
+              'property'   => 'Real Estate & Property',
+              'litigation' => 'Litigation & NI Act',
+              'ip'         => 'Intellectual Property',
+              'tech'       => 'Cyber & AI Law',
+              'labor'      => 'Labor & Employment',
+              'family'     => 'Family & Civil Rights',
+              'banking'    => 'Banking & Financial Recoveries'
+          );
+          foreach ($default_blog_cats as $c_slug => $c_label) :
             $cat_url = add_query_arg('category', $c_slug, $page_base_url);
             $is_active = ($selected_cat === $c_slug);
           ?>

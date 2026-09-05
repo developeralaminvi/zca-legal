@@ -78,7 +78,7 @@ function zca_legal_enqueue_assets() {
         'zca-style',
         get_template_directory_uri() . '/assets/css/style.css',
         array(),
-        '1.2.1'
+        '1.2.2'
     );
 
     // Responsive Breakpoints
@@ -86,7 +86,7 @@ function zca_legal_enqueue_assets() {
         'zca-responsive',
         get_template_directory_uri() . '/assets/css/responsive.css',
         array('zca-style'),
-        '1.2.1'
+        '1.2.2'
     );
 
     // Main Theme JavaScript Engine
@@ -94,7 +94,7 @@ function zca_legal_enqueue_assets() {
         'zca-main-js',
         get_template_directory_uri() . '/assets/js/main.js',
         array(),
-        '1.2.1',
+        '1.2.2',
         true
     );
 
@@ -103,7 +103,7 @@ function zca_legal_enqueue_assets() {
         'zca-ajax-booking',
         get_template_directory_uri() . '/assets/js/ajax-booking.js',
         array('zca-main-js'),
-        '1.2.1',
+        '1.2.2',
         true
     );
 
